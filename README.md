@@ -12,7 +12,7 @@ You can have any number of AppleTV Images on your web page.
 
 <img src="http://d.pr/i/12IWV+" alt="atcImg example" width="246" height="240">
  
-A live example of this plug-in can bee seen here: http://kloc.pm
+A live example of this plug-in can bee seen here: ~~http://kloc.pm~~ (coming soon)
 
 Here is a video explaining how it works: http://d.pr/v/18YXv
  
