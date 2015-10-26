@@ -10,11 +10,11 @@ This lightweight (2kb) plug-in will automatically turn your layered Apple TV PNG
 3D parallax icons, the same way the new Apple TV treats app icons.
 You can have any number of AppleTV Images on your web page. 
 
-<img src="http://d.pr/i/1hiyA+" alt="atcImg example" width="278" height="240">
+<img src="http://d.pr/i/12IWV+" alt="atcImg example" width="246" height="240">
  
 A live example of this plug-in can bee seen here: http://kloc.pm
 
-Here is a video explaining how it works: http://d.pr/v/AwuO
+Here is a video explaining how it works: http://d.pr/v/18YXv
  
 -------------------
  
