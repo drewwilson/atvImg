@@ -2,6 +2,8 @@
 
 `atvImg` = 'AppleTV Image'
 
+Made by http://drewwilson.com
+
 ---
 
 This plug-in will automatically turn your layered Apple TV PNGs into
@@ -39,3 +41,5 @@ Just be sure you add that line after you've loaded the DOM. So put it below all 
 This `atvImg` plug-in is dual licensed under the MIT and GPL licenses:
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
+
+I used http://designmodo.com/apple-tv-effect as reference and inspiration when creating this plug-in.
