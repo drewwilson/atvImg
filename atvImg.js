@@ -1,32 +1,53 @@
 /*
  * atvImg
  * Copyright 2015 Drew Wilson
- * www.drewwilson.com
+ * http://drewwilson.com
  *
- * Version 1.0   -   Updated: Oct. 24, 2015
+ * Version 1.0   -   Updated: Oct. 25, 2015
  *
+ * atvImg = 'AppleTV Image'
+ * 
+ * This plug-in will automatically turn your layered Apple TV PNGs into
+ * 3D parallax icons, the same way the new Apple TV treats app icons.
+ * You can have any number of AppleTV Images on the page.
+ *
+ * An example of this plug-in can bee seen here: http://kloc.pm
+ *
+ * -------------------
+ *
+ * Here is how to setup the HTML for a single atvImg:
+ * <div class="atvImg">
+ *		<div class="atvImg-layer" data-img="/images/back.png"></div>
+ *		<div class="atvImg-layer" data-img="/images/front.png"></div>
+ * </div>
+ * 
+ * You can have any number of 'atvImg-layer' elements. So add as many
+ * as your icon needs. Be sure to use 2x (retina) scale PNGs. The plug-in
+ * will downscale for 1x screens. Using 2x scale PNGs is recommended
+ * so the icon will appear crisp on 2x screens. Layer images should be
+ * 1280px X 768px. The plug-in will adapt the atvImg to be whatever size
+ * it's parent element is. So if you set your '.atvImg' element to be
+ * 320px X 190px, that is how big the icon will appear. If you set it
+ * to be 640px X 380px, that is how big it iwll appear. Just be sure to
+ * use the correct aspect ratio for AppleTV icons.
+ * Then call the funciton in you <script> tag or JS file like this: 
+ *
+ * atvImg();
+ *
+ * -------------------
  *
  * This atvImg plug-in is dual licensed under the MIT and GPL licenses:
  *   http://www.opensource.org/licenses/mit-license.php
  *   http://www.gnu.org/licenses/gpl.html
  */
 
-function atvImg(opts){
-	if(typeof opts == 'undefined'){
-		opts = {};
-	}
-	if(opts.class == undefined){
-		opts.class = 'atvImg';
-	}
-	if(opts.target == undefined){
-		opts.target = 'parent';
-	}
+function atvImg(){
 
 	var d = document,
 		de = d.documentElement,
 		bd = d.getElementsByTagName('body')[0],
 		win = window,
-		imgs = d.querySelectorAll('.'+opts.class),
+		imgs = d.querySelectorAll('.atvImg'),
 		totalImgs = imgs.length;
 
 	if(totalImgs <= 0){
@@ -36,7 +57,8 @@ function atvImg(opts){
 	// build HTML
 	for(var l=0;l<totalImgs;l++){
 
-		var layerElems = d.querySelectorAll('.'+opts.class+' .atvImg-layer'),
+		var thisImg = imgs[l],
+			layerElems = thisImg.querySelectorAll('.atvImg-layer'),
 			totalLayerElems = layerElems.length;
 
 		if(totalLayerElems <= 0){
@@ -48,8 +70,8 @@ function atvImg(opts){
 			shadowHTML = d.createElement('div'),
 			layersHTML = d.createElement('div');
 
+		thisImg.id = 'atvImg__'+l;
 		containerHTML.className = 'atvImg-container';
-		containerHTML.id = 'atvImg_container_'+l;
 		shineHTML.className = 'atvImg-shine';
 		shadowHTML.className = 'atvImg-shadow';
 		layersHTML.className = 'atvImg-layers';
@@ -68,123 +90,87 @@ function atvImg(opts){
 		containerHTML.appendChild(layersHTML);
 		containerHTML.appendChild(shineHTML);
 
-		while(imgs[l].firstChild) {
-			imgs[l].removeChild(imgs[l].firstChild);
+		while(thisImg.firstChild) {
+			thisImg.removeChild(thisImg.firstChild);
 		}
+		thisImg.appendChild(containerHTML);
 
-		imgs[l].appendChild(containerHTML);
+		var w = thisImg.clientWidth || thisImg.offsetWidth || thisImg.scrollWidth;
+		thisImg.style.transform = 'perspective('+ w*3 +'px)';
 
-		if(opts.target == 'parent'){
-			imgs[l].addEventListener('mousemove', function(e){
-				processMovement(e,containerHTML);		
+		(function(_thisImg) {
+			thisImg.addEventListener('mousemove', function(e){
+				processMovement(e,_thisImg);		
 			});
-			imgs[l].addEventListener('mouseenter', function(e){
-				processEnter(e,containerHTML);		
+            thisImg.addEventListener('mouseenter', function(e){
+				processEnter(e,_thisImg);		
 			});
-			imgs[l].addEventListener('mouseleave', function(e){
-				processExit(e,containerHTML);		
+			thisImg.addEventListener('mouseleave', function(e){
+				processExit(e,_thisImg);		
 			});
-		}
-	}
-
-	if(opts.target == 'window'){
-		win.addEventListener('mousemove', function(e){
-			processMovement(e,false);		
-		});
-		win.addEventListener('mouseenter', function(e){
-			processEnter(e,false);		
-		});
-		win.addEventListener('mouseleave', function(e){
-			processExit(e,false);		
-		});
+        })(thisImg);
 	}
 
 	function processMovement(e, elem){
 
-		if(elem){
-			var offsets = elem.parentNode.getBoundingClientRect(),
-				w = elem.clientWidth || elem.offsetWidth || elem.scrollWidth, // width
-				h = elem.clientHeight || elem.offsetHeight || elem.scrollHeight, // height
-				offsetX = 0.52 - (e.pageX - offsets.left)/w, //cursor position X
-				offsetY = 0.52 - (e.pageY - offsets.top)/h, //cursor position Y
-				dy = (e.pageY - offsets.top) - h / 2, //@h/2 = center of container
-				dx = (e.pageX - offsets.left) - w / 2; //@w/2 = center of container
-		} else {
-			var w = win.innerWidth || de.clientWidth || bd.clientWidth, // width
-				h = win.innerHeight || de.clientHeight || bd.clientHeight, // height
-				offsetX = 0.5 - e.pageX / w, //cursor position X
-				offsetY = 0.5 - e.pageY / h, //cursor position Y
-				dy = e.pageY - h / 2, //@h/2 = center of container
-				dx = e.pageX - w / 2; //@w/2 = center of container
+		var layers = elem.querySelectorAll('.atvImg-rendered-layer'),
+			totalLayers = layers.length,
+			shine = elem.querySelector('.atvImg-shine'),
+			bdst = bd.scrollTop,
+			bdsl = bd.scrollLeft,
+			offsets = elem.getBoundingClientRect(),
+			w = elem.clientWidth || elem.offsetWidth || elem.scrollWidth, // width
+			h = elem.clientHeight || elem.offsetHeight || elem.scrollHeight, // height
+			offsetX = 0.52 - (e.pageX - offsets.left - bdsl)/w, //cursor position X
+			offsetY = 0.52 - (e.pageY - offsets.top - bdst)/h, //cursor position Y
+			dy = (e.pageY - offsets.top - bdst) - h / 2, //@h/2 = center of container
+			dx = (e.pageX - offsets.left - bdsl) - w / 2, //@w/2 = center of container
+			yRotate = (offsetX - dx)*0.07, //rotation for container Y
+			xRotate = (dy - offsetY)*0.1, //rotation for container X
+			imgCSS = 'rotateX(' + xRotate + 'deg) rotateY(' + yRotate + 'deg)', //img transform
+			arad = Math.atan2(dy, dx), //angle between cursor and center of container in RAD
+			angle = arad * 180 / Math.PI - 90; //convert rad in degrees
+
+		//get angle between 0-360
+		if (angle < 0) {
+			angle = angle + 360;
 		}
 
-		var containers = (elem)? [elem] : d.querySelectorAll('.'+opts.class),
-			totalContainers = containers.length,
-			layers = (elem)? d.querySelectorAll('#'+elem.id+' .atvImg-rendered-layer') : d.querySelectorAll('.'+opts.class+' .atvImg-rendered-layer'),
-			totalLayers = layers.length,
-			shine = (elem)? d.querySelectorAll('#'+elem.id+' .atvImg-shine') : d.querySelectorAll('.'+opts.class+' .atvImg-shine'),
-			totalShine = shine.length,
-			arad = Math.atan2(dy, dx), //angle between cursor and center of container in RAD
-			angle = arad * 180 / Math.PI - 90, //convert rad in degrees
-			transformCSS = 'translateY(' + -offsetX * totalLayers + 'px) rotateX(' + (-offsetY * totalLayers) + 'deg) rotateY(' + (offsetX * (totalLayers * 2)) + 'deg) scale3d(1.05,1.05,1.05)'; //container transform
+		//container transform
+		if(elem.firstChild.className.indexOf(' over') != -1){
+			imgCSS += ' scale3d(1.07,1.07,1.07)';
+		}
+		elem.firstChild.style.transform = imgCSS;
+		
 
+		//gradient angle and opacity for shine
+		shine.style.background = 'linear-gradient(' + angle + 'deg, rgba(255,255,255,' + e.pageY / h * .25 + ') 0%,rgba(255,255,255,0) 80%)';
+		shine.style.transform = 'translateX(' + (offsetX * totalLayers) - 0.1 + 'px) translateY(' + (offsetY * totalLayers) - 0.1 + 'px)';
+		
 
-			//get angle between 0-360
-			if (angle < 0) {
-				angle = angle + 360;
-			}
-
-			var revNum = totalLayers;
-
-			//gradient angle and opacity
-			for(var s=0;s<totalShine;s++){
-				shine[s].style.background = 'linear-gradient(' + angle + 'deg, rgba(255,255,255,' + e.pageY / h * .25 + ') 0%,rgba(255,255,255,0) 80%)';
-				shine[s].style.transform = 'translateX(' + offsetX * (revNum *2) + 'px) translateY(' + offsetY * (totalLayers *2) + 'px)';
-			}
-
-			//container transform
-			for(var c=0;c<totalContainers;c++){
-				containers[c].style.transform = transformCSS;
-			}
-
-			//parallax foreach layer
-			for(var ly=0;ly<totalLayers;ly++){
-				layers[ly].style.transform = 'translateX(' + offsetX * (revNum *2) + 'px) translateY(' + offsetY * (totalLayers *2) + 'px)';
-				revNum--;
-			}
+		//parallax for each layer
+		var revNum = totalLayers;
+		for(var ly=0;ly<totalLayers;ly++){
+			layers[ly].style.transform = 'translateX(' + (offsetX * revNum) * (ly*2.5) + 'px) translateY(' + (offsetY * totalLayers) * (ly*2.5) + 'px)';
+			revNum--;
+		}
 	}
 
 	function processEnter(e, elem){
-
-		var containers = (elem)? [elem] : d.querySelectorAll('.'+opts.class),
-			totalContainers = containers.length,
-			layers = (elem)? d.querySelectorAll('#'+elem.id+' .atvImg-rendered-layer') : d.querySelectorAll('.'+opts.class+' .atvImg-rendered-layer'),
-			totalLayers = layers.length,
-			shine = (elem)? d.querySelectorAll('#'+elem.id+' .atvImg-shine') : d.querySelectorAll('.'+opts.class+' .atvImg-shine'),
-			totalShine = shine.length;
-
-		for(var c=0;c<totalContainers;c++){
-			containers[c].className += ' over';
-		}
-
+		elem.firstChild.className += ' over';
 	}
 
 	function processExit(e, elem){
 
-		var containers = (elem)? [elem] : d.querySelectorAll('.'+opts.class),
-			totalContainers = containers.length,
-			layers = (elem)? d.querySelectorAll('#'+elem.id+' .atvImg-rendered-layer') : d.querySelectorAll('.'+opts.class+' .atvImg-rendered-layer'),
+		var layers = elem.querySelectorAll('.atvImg-rendered-layer'),
 			totalLayers = layers.length,
-			shine = (elem)? d.querySelectorAll('#'+elem.id+' .atvImg-shine') : d.querySelectorAll('.'+opts.class+' .atvImg-shine'),
-			totalShine = shine.length;
+			shine = elem.querySelector('.atvImg-shine');
 
-		for(var c=0;c<totalContainers;c++){
-			containers[c].className = containers[c].className.replace(' over','');
-			containers[c].style.transform = '';
-		}
-		for(var s=0;s<totalShine;s++){
-			shine[s].style.cssText = '';
-		}
+		var container = elem.firstChild;
+		container.className = container.className.replace(' over','');
+		container.style.transform = '';
+		shine.style.cssText = '';
+		
 		for(var ly=0;ly<totalLayers;ly++){
 			layers[ly].style.transform = '';
 		}
