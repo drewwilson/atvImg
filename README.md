@@ -6,9 +6,9 @@ Made by http://drewwilson.com
 
 ---
 
-This plug-in will automatically turn your layered Apple TV PNGs into
+This lightweight (2kb) plug-in will automatically turn your layered Apple TV PNGs into
 3D parallax icons, the same way the new Apple TV treats app icons.
-You can have any number of AppleTV Images on the page.
+You can have any number of AppleTV Images on your web page. 
 
 <img src="http://d.pr/i/1hiyA+" alt="atcImg example" width="278" height="240">
  
