@@ -137,12 +137,13 @@ function atvImg(){
 			offsets = elem.getBoundingClientRect(),
 			w = elem.clientWidth || elem.offsetWidth || elem.scrollWidth, // width
 			h = elem.clientHeight || elem.offsetHeight || elem.scrollHeight, // height
+			wMultiple = 320/w,
 			offsetX = 0.52 - (e.pageX - offsets.left - bdsl)/w, //cursor position X
 			offsetY = 0.52 - (e.pageY - offsets.top - bdst)/h, //cursor position Y
 			dy = (e.pageY - offsets.top - bdst) - h / 2, //@h/2 = center of container
 			dx = (e.pageX - offsets.left - bdsl) - w / 2, //@w/2 = center of container
-			yRotate = (offsetX - dx)*0.07, //rotation for container Y
-			xRotate = (dy - offsetY)*0.1, //rotation for container X
+			yRotate = (offsetX - dx)*(0.07 * wMultiple), //rotation for container Y
+			xRotate = (dy - offsetY)*(0.1 * wMultiple), //rotation for container X
 			imgCSS = 'rotateX(' + xRotate + 'deg) rotateY(' + yRotate + 'deg)', //img transform
 			arad = Math.atan2(dy, dx), //angle between cursor and center of container in RAD
 			angle = arad * 180 / Math.PI - 90; //convert rad in degrees
@@ -159,13 +160,13 @@ function atvImg(){
 		elem.firstChild.style.transform = imgCSS;
 		
 		//gradient angle and opacity for shine
-		shine.style.background = 'linear-gradient(' + angle + 'deg, rgba(255,255,255,' + e.pageY / h * .25 + ') 0%,rgba(255,255,255,0) 80%)';
+		shine.style.background = 'linear-gradient(' + angle + 'deg, rgba(255,255,255,' + (e.pageY - offsets.top - bdst)/h * 0.4 + ') 0%,rgba(255,255,255,0) 80%)';
 		shine.style.transform = 'translateX(' + (offsetX * totalLayers) - 0.1 + 'px) translateY(' + (offsetY * totalLayers) - 0.1 + 'px)';	
 
 		//parallax for each layer
 		var revNum = totalLayers;
 		for(var ly=0;ly<totalLayers;ly++){
-			layers[ly].style.transform = 'translateX(' + (offsetX * revNum) * (ly*2.5) + 'px) translateY(' + (offsetY * totalLayers) * (ly*2.5) + 'px)';
+			layers[ly].style.transform = 'translateX(' + (offsetX * revNum) * ((ly * 2.5) / wMultiple) + 'px) translateY(' + (offsetY * totalLayers) * ((ly * 2.5) / wMultiple) + 'px)';
 			revNum--;
 		}
 	}
