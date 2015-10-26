@@ -3,7 +3,7 @@
  * Copyright 2015 Drew Wilson
  * http://drewwilson.com
  *
- * Version 1.0   -   Updated: Oct. 25, 2015
+ * Version 1.0   -   Updated: Oct. 26, 2015
  *
  * atvImg = 'AppleTV Image'
  * 
@@ -28,11 +28,16 @@
  * 1280px X 768px. The plug-in will adapt the atvImg to be whatever size
  * it's parent element is. So if you set your '.atvImg' element to be
  * 320px X 190px, that is how big the icon will appear. If you set it
- * to be 640px X 380px, that is how big it iwll appear. Just be sure to
+ * to be 640px X 380px, that is how big it will appear. Just be sure to
  * use the correct aspect ratio for AppleTV icons.
  * Then call the funciton in you <script> tag or JS file like this: 
  *
  * atvImg();
+ *
+ *
+ * Just be sure you add that line after you've loaded the DOM. So put
+ * it below all your page's HTML just before the closing </body> tag or
+ * in a document.ready() function.
  *
  * -------------------
  *
@@ -68,7 +73,8 @@ function atvImg(){
 		var containerHTML = d.createElement('div'),
 			shineHTML = d.createElement('div'),
 			shadowHTML = d.createElement('div'),
-			layersHTML = d.createElement('div');
+			layersHTML = d.createElement('div'),
+			layers = [];
 
 		thisImg.id = 'atvImg__'+l;
 		containerHTML.className = 'atvImg-container';
@@ -84,6 +90,8 @@ function atvImg(){
 			layer.setAttribute('data-layer',i);
 			layer.style.backgroundImage = 'url('+imgSrc+')';
 			layersHTML.appendChild(layer);
+
+			layers.push(layer);
 		}
 
 		containerHTML.appendChild(shadowHTML);
@@ -98,25 +106,22 @@ function atvImg(){
 		var w = thisImg.clientWidth || thisImg.offsetWidth || thisImg.scrollWidth;
 		thisImg.style.transform = 'perspective('+ w*3 +'px)';
 
-		(function(_thisImg) {
+		(function(_thisImg,_layers,_totalLayers,_shine) {
 			thisImg.addEventListener('mousemove', function(e){
-				processMovement(e,_thisImg);		
+				processMovement(e,_thisImg,_layers,_totalLayers,_shine);		
 			});
             thisImg.addEventListener('mouseenter', function(e){
 				processEnter(e,_thisImg);		
 			});
 			thisImg.addEventListener('mouseleave', function(e){
-				processExit(e,_thisImg);		
+				processExit(e,_thisImg,_layers,_totalLayers,_shine);		
 			});
-        })(thisImg);
+        })(thisImg,layers,totalLayerElems,shineHTML);
 	}
 
-	function processMovement(e, elem){
+	function processMovement(e, elem, layers, totalLayers, shine){
 
-		var layers = elem.querySelectorAll('.atvImg-rendered-layer'),
-			totalLayers = layers.length,
-			shine = elem.querySelector('.atvImg-shine'),
-			bdst = bd.scrollTop,
+		var bdst = bd.scrollTop,
 			bdsl = bd.scrollLeft,
 			offsets = elem.getBoundingClientRect(),
 			w = elem.clientWidth || elem.offsetWidth || elem.scrollWidth, // width
@@ -142,11 +147,9 @@ function atvImg(){
 		}
 		elem.firstChild.style.transform = imgCSS;
 		
-
 		//gradient angle and opacity for shine
 		shine.style.background = 'linear-gradient(' + angle + 'deg, rgba(255,255,255,' + e.pageY / h * .25 + ') 0%,rgba(255,255,255,0) 80%)';
-		shine.style.transform = 'translateX(' + (offsetX * totalLayers) - 0.1 + 'px) translateY(' + (offsetY * totalLayers) - 0.1 + 'px)';
-		
+		shine.style.transform = 'translateX(' + (offsetX * totalLayers) - 0.1 + 'px) translateY(' + (offsetY * totalLayers) - 0.1 + 'px)';	
 
 		//parallax for each layer
 		var revNum = totalLayers;
@@ -160,13 +163,10 @@ function atvImg(){
 		elem.firstChild.className += ' over';
 	}
 
-	function processExit(e, elem){
-
-		var layers = elem.querySelectorAll('.atvImg-rendered-layer'),
-			totalLayers = layers.length,
-			shine = elem.querySelector('.atvImg-shine');
+	function processExit(e, elem, layers, totalLayers, shine){
 
 		var container = elem.firstChild;
+
 		container.className = container.className.replace(' over','');
 		container.style.transform = '';
 		shine.style.cssText = '';
