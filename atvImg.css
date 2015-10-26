@@ -3,6 +3,11 @@
 	transform-style: preserve-3d;
 }
 
+.atvImg img {
+	border-radius: 5px;
+	box-shadow: 0 2px 8px rgba(14,21,47,0.25);
+}
+
 .atvImg-container {
 	position: relative;
 	width: 100%;
