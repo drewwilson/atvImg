@@ -37,7 +37,7 @@ Layer images should be 2x the size you want to display the icon as. The plug-in 
 
 The `<img>` element in the example above is a fallback in case javascript is not allowed to run. It will be removed when the plug-in is running. Put a flattened version (no layers) of you icon in there.
 
-Then call the funciton in you `<script>` tag or JS file like this: 
+Then call the function in you `<script>` tag or JS file like this: 
 
 `atvImg();`
 
