@@ -3,7 +3,7 @@
  * Copyright 2015 Drew Wilson
  * http://drewwilson.com
  *
- * Version 1.0   -   Updated: Oct. 26, 2015
+ * Version 1.1   -   Updated: Oct. 26, 2015
  *
  * atvImg = 'AppleTV Image'
  * 
@@ -64,7 +64,8 @@ function atvImg(){
 		bd = d.getElementsByTagName('body')[0],
 		win = window,
 		imgs = d.querySelectorAll('.atvImg'),
-		totalImgs = imgs.length;
+		totalImgs = imgs.length,
+		supportsTouch = 'ontouchstart' in win || navigator.msMaxTouchPoints;
 
 	if(totalImgs <= 0){
 		return;
@@ -117,31 +118,54 @@ function atvImg(){
 		var w = thisImg.clientWidth || thisImg.offsetWidth || thisImg.scrollWidth;
 		thisImg.style.transform = 'perspective('+ w*3 +'px)';
 
-		(function(_thisImg,_layers,_totalLayers,_shine) {
-			thisImg.addEventListener('mousemove', function(e){
-				processMovement(e,_thisImg,_layers,_totalLayers,_shine);		
-			});
-            thisImg.addEventListener('mouseenter', function(e){
-				processEnter(e,_thisImg);		
-			});
-			thisImg.addEventListener('mouseleave', function(e){
-				processExit(e,_thisImg,_layers,_totalLayers,_shine);		
-			});
-        })(thisImg,layers,totalLayerElems,shineHTML);
+		if(supportsTouch){
+			win.preventScroll = false;
+
+	        (function(_thisImg,_layers,_totalLayers,_shine) {
+				thisImg.addEventListener('touchmove', function(e){
+					if (win.preventScroll){
+						e.preventDefault();
+					}
+					processMovement(e,true,_thisImg,_layers,_totalLayers,_shine);		
+				});
+	            thisImg.addEventListener('touchstart', function(e){
+	            	win.preventScroll = true;
+					processEnter(e,_thisImg);		
+				});
+				thisImg.addEventListener('touchend', function(e){
+					win.preventScroll = false;
+					processExit(e,_thisImg,_layers,_totalLayers,_shine);		
+				});
+	        })(thisImg,layers,totalLayerElems,shineHTML);
+	    } else {
+	    	(function(_thisImg,_layers,_totalLayers,_shine) {
+				thisImg.addEventListener('mousemove', function(e){
+					processMovement(e,false,_thisImg,_layers,_totalLayers,_shine);		
+				});
+	            thisImg.addEventListener('mouseenter', function(e){
+					processEnter(e,_thisImg);		
+				});
+				thisImg.addEventListener('mouseleave', function(e){
+					processExit(e,_thisImg,_layers,_totalLayers,_shine);		
+				});
+	        })(thisImg,layers,totalLayerElems,shineHTML);
+	    }
 	}
 
-	function processMovement(e, elem, layers, totalLayers, shine){
+	function processMovement(e, touchEnabled, elem, layers, totalLayers, shine){
 
 		var bdst = bd.scrollTop,
 			bdsl = bd.scrollLeft,
+			pageX = (touchEnabled)? e.touches[0].pageX : e.pageX,
+			pageY = (touchEnabled)? e.touches[0].pageY : e.pageY,
 			offsets = elem.getBoundingClientRect(),
 			w = elem.clientWidth || elem.offsetWidth || elem.scrollWidth, // width
 			h = elem.clientHeight || elem.offsetHeight || elem.scrollHeight, // height
 			wMultiple = 320/w,
-			offsetX = 0.52 - (e.pageX - offsets.left - bdsl)/w, //cursor position X
-			offsetY = 0.52 - (e.pageY - offsets.top - bdst)/h, //cursor position Y
-			dy = (e.pageY - offsets.top - bdst) - h / 2, //@h/2 = center of container
-			dx = (e.pageX - offsets.left - bdsl) - w / 2, //@w/2 = center of container
+			offsetX = 0.52 - (pageX - offsets.left - bdsl)/w, //cursor position X
+			offsetY = 0.52 - (pageY - offsets.top - bdst)/h, //cursor position Y
+			dy = (pageY - offsets.top - bdst) - h / 2, //@h/2 = center of container
+			dx = (pageX - offsets.left - bdsl) - w / 2, //@w/2 = center of container
 			yRotate = (offsetX - dx)*(0.07 * wMultiple), //rotation for container Y
 			xRotate = (dy - offsetY)*(0.1 * wMultiple), //rotation for container X
 			imgCSS = 'rotateX(' + xRotate + 'deg) rotateY(' + yRotate + 'deg)', //img transform
@@ -160,7 +184,7 @@ function atvImg(){
 		elem.firstChild.style.transform = imgCSS;
 		
 		//gradient angle and opacity for shine
-		shine.style.background = 'linear-gradient(' + angle + 'deg, rgba(255,255,255,' + (e.pageY - offsets.top - bdst)/h * 0.4 + ') 0%,rgba(255,255,255,0) 80%)';
+		shine.style.background = 'linear-gradient(' + angle + 'deg, rgba(255,255,255,' + (pageY - offsets.top - bdst)/h * 0.4 + ') 0%,rgba(255,255,255,0) 80%)';
 		shine.style.transform = 'translateX(' + (offsetX * totalLayers) - 0.1 + 'px) translateY(' + (offsetY * totalLayers) - 0.1 + 'px)';	
 
 		//parallax for each layer

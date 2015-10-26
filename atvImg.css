@@ -1,6 +1,7 @@
 .atvImg {
 	border-radius: 5px;
 	transform-style: preserve-3d;
+	-webkit-tap-highlight-color: rgba(#000,0);
 }
 
 .atvImg img {

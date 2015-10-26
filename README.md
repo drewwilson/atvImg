@@ -11,13 +11,15 @@ This lightweight (2kb) plug-in will automatically turn your layered Apple TV PNG
 You can have any number of AppleTV Images on your web page. 
 
 No dependencies, this plugin is just plain ol' vanilla javascript. Works on all 
-major browsers.
+major browsers. It even supports touch and mobile.
 
 <img src="http://d.pr/i/12IWV+" alt="atcImg example" width="246" height="240">
  
 A live example of this plug-in can bee seen here: ~~http://kloc.pm~~ (coming soon)
 
 Here is a video explaining how it works: http://d.pr/v/18YXv
+
+Here is a video showing off the touch/mobile support: http://d.pr/v/1k2Ju
  
 -------------------
  
