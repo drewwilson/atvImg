@@ -15,7 +15,7 @@ major browsers. It even supports touch and mobile.
 
 <img src="http://d.pr/i/12IWV+" alt="atcImg example" width="246" height="240">
  
-A live example of this plug-in can bee seen here: ~~http://kloc.pm~~ (coming soon)
+A live example of this plug-in can bee seen here: http://kloc.pm
 
 Here is a video explaining how it works: http://d.pr/v/18YXv
 
