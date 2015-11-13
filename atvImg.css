@@ -2,6 +2,7 @@
 	border-radius: 5px;
 	transform-style: preserve-3d;
 	-webkit-tap-highlight-color: rgba(#000,0);
+	will-change: transform;
 }
 
 .atvImg img {
@@ -15,6 +16,7 @@
 	height: 100%;
 	border-radius: 5px;
 	transition: all 0.2s ease-out;
+	will-change: transform;
 }
 
 .atvImg-container.over .atvImg-shadow {
@@ -41,6 +43,7 @@
 	background-color: transparent;
 	background-size: cover;
 	transition: all 0.1s ease-out;
+	will-change: transform;
 }
 
 .atvImg-shadow {
@@ -61,4 +64,5 @@
 	bottom: 0;
 	border-radius: 5px;
 	background: linear-gradient(135deg, rgba(255,255,255,.25) 0%,rgba(255,255,255,0) 60%);
+	will-change: background;
 }
