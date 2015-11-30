@@ -1,0 +1,24 @@
+{
+  "name": "atvimg",
+  "version": "1.0.0",
+  "description": "3D parallax icons like those in Apple TV.",
+  "main": "atvImg.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/drewwilson/atvImg.git"
+  },
+  "keywords": [
+    "html",
+    "parallax",
+    "icon"
+  ],
+  "author": "Drew Wilson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/drewwilson/atvImg/issues"
+  },
+  "homepage": "https://github.com/drewwilson/atvImg#readme"
+}
