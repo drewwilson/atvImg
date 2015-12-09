@@ -3,7 +3,7 @@
  * Copyright 2015 Drew Wilson
  * http://drewwilson.com
  *
- * Version 1.1   -   Updated: Oct. 26, 2015
+ * Version 1.2   -   Updated: Dec. 09, 2015
  *
  * atvImg = 'AppleTV Image'
  * 
@@ -62,6 +62,7 @@ function atvImg(){
 	var d = document,
 		de = d.documentElement,
 		bd = d.getElementsByTagName('body')[0],
+		htm = d.getElementsByTagName('html')[0],
 		win = window,
 		imgs = d.querySelectorAll('.atvImg'),
 		totalImgs = imgs.length,
@@ -154,7 +155,7 @@ function atvImg(){
 
 	function processMovement(e, touchEnabled, elem, layers, totalLayers, shine){
 
-		var bdst = bd.scrollTop,
+		var bdst = bd.scrollTop || htm.scrollTop,
 			bdsl = bd.scrollLeft,
 			pageX = (touchEnabled)? e.touches[0].pageX : e.pageX,
 			pageY = (touchEnabled)? e.touches[0].pageY : e.pageY,
