@@ -24,7 +24,7 @@ Here is a video showing off the touch/mobile support: http://d.pr/v/1k2Ju
 -------------------
  
 Here is how to setup the HTML for a single `atvImg`:
-```
+```html
 <div class="atvImg">
    <img src="/images/flattened-icon.jpg">
    
