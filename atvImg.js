@@ -6,7 +6,7 @@
  * Version 1.2   -   Updated: Dec. 09, 2015
  *
  * atvImg = 'AppleTV Image'
- * 
+ *
  * This plug-in will automatically turn your layered Apple TV PNGs into
  * 3D parallax icons, the same way the new Apple TV treats app icons.
  * You can have any number of AppleTV Images on the page.
@@ -22,23 +22,23 @@
  *		<div class="atvImg-layer" data-img="/images/back.png"></div>
  *		<div class="atvImg-layer" data-img="/images/front.png"></div>
  * </div>
- * 
+ *
  * You can have any number of 'atvImg-layer' elements. So add as many
  * as your icon needs. Be sure to use 2x (retina) scale PNGs. The plug-in
  * will downscale for 1x screens. Using 2x scale PNGs is recommended
- * so the icon will appear crisp on 2x screens. 
+ * so the icon will appear crisp on 2x screens.
  * Layer images should be 2x the size you want to display the icon as.
  * The plug-in will adapt the atvImg to be whatever size it's parent
  * element is. So if you set your '.atvImg' element to be 320px X 190px,
- * that is how big the icon will appear. If you set it to be 
+ * that is how big the icon will appear. If you set it to be
  * 640px X 380px, that is how big it will appear. Just be sure to
  * use the correct aspect ratio for AppleTV icons.
  *
- * The <img> element in the example above is a fallback in case 
+ * The <img> element in the example above is a fallback in case
  * javascript is not allowed to run. It will be removed when the plug-in
  * is running. Put a flattened version (no layers) of you icon in there.
- * 
- * Then call the funciton in you <script> tag or JS file like this: 
+ *
+ * Then call the funciton in you <script> tag or JS file like this:
  *
  * atvImg();
  *
@@ -86,7 +86,7 @@ function atvImg(){
 		while(thisImg.firstChild) {
 			thisImg.removeChild(thisImg.firstChild);
 		}
-	
+
 		var containerHTML = d.createElement('div'),
 			shineHTML = d.createElement('div'),
 			shadowHTML = d.createElement('div'),
@@ -127,27 +127,30 @@ function atvImg(){
 					if (win.preventScroll){
 						e.preventDefault();
 					}
-					processMovement(e,true,_thisImg,_layers,_totalLayers,_shine);		
+					processMovement(e,true,_thisImg,_layers,_totalLayers,_shine);
 				});
 	            thisImg.addEventListener('touchstart', function(e){
 	            	win.preventScroll = true;
-					processEnter(e,_thisImg);		
+					processEnter(e,_thisImg);
 				});
 				thisImg.addEventListener('touchend', function(e){
 					win.preventScroll = false;
-					processExit(e,_thisImg,_layers,_totalLayers,_shine);		
+					processExit(e,_thisImg,_layers,_totalLayers,_shine);
 				});
 	        })(thisImg,layers,totalLayerElems,shineHTML);
 	    } else {
 	    	(function(_thisImg,_layers,_totalLayers,_shine) {
 				thisImg.addEventListener('mousemove', function(e){
-					processMovement(e,false,_thisImg,_layers,_totalLayers,_shine);		
+					processMovement(e,false,_thisImg,_layers,_totalLayers,_shine);
 				});
 	            thisImg.addEventListener('mouseenter', function(e){
-					processEnter(e,_thisImg);		
+					processEnter(e,_thisImg);
 				});
 				thisImg.addEventListener('mouseleave', function(e){
-					processExit(e,_thisImg,_layers,_totalLayers,_shine);		
+					processExit(e,_thisImg,_layers,_totalLayers,_shine);
+				});
+				thisImg.addEventListener('mousedown', function(e){
+					processClick(e,_thisImg);
 				});
 	        })(thisImg,layers,totalLayerElems,shineHTML);
 	    }
@@ -183,10 +186,10 @@ function atvImg(){
 			imgCSS += ' scale3d(1.07,1.07,1.07)';
 		}
 		elem.firstChild.style.transform = imgCSS;
-		
+
 		//gradient angle and opacity for shine
 		shine.style.background = 'linear-gradient(' + angle + 'deg, rgba(255,255,255,' + (pageY - offsets.top - bdst)/h * 0.4 + ') 0%,rgba(255,255,255,0) 80%)';
-		shine.style.transform = 'translateX(' + (offsetX * totalLayers) - 0.1 + 'px) translateY(' + (offsetY * totalLayers) - 0.1 + 'px)';	
+		shine.style.transform = 'translateX(' + (offsetX * totalLayers) - 0.1 + 'px) translateY(' + (offsetY * totalLayers) - 0.1 + 'px)';
 
 		//parallax for each layer
 		var revNum = totalLayers;
@@ -200,6 +203,11 @@ function atvImg(){
 		elem.firstChild.className += ' over';
 	}
 
+	function processClick(e, elem){
+		var imgCSS = 'scale3d(1.03,1.03,1.03)';
+		elem.firstChild.style.transform = imgCSS;
+	}
+
 	function processExit(e, elem, layers, totalLayers, shine){
 
 		var container = elem.firstChild;
@@ -207,7 +215,7 @@ function atvImg(){
 		container.className = container.className.replace(' over','');
 		container.style.transform = '';
 		shine.style.cssText = '';
-		
+
 		for(var ly=0;ly<totalLayers;ly++){
 			layers[ly].style.transform = '';
 		}
