@@ -17,8 +17,9 @@
 	transition: all 0.2s ease-out;
 }
 
+/* animating opacity is less expensive than animating box shadow */
 .atvImg-container.over .atvImg-shadow {
-	box-shadow: 0 45px 100px rgba(14,21,47,0.4), 0 16px 40px rgba(14,21,47,0.4);
+	opacity: 1;
 }
 
 .atvImg-layers {
@@ -50,7 +51,8 @@
 	width: 90%;
 	height: 90%;
 	transition: all 0.2s ease-out;
-	box-shadow: 0 8px 30px rgba(14,21,47,0.6);
+	opacity: 0.5;
+	box-shadow: 0 45px 100px rgba(14,21,47,0.4), 0 16px 40px rgba(14,21,47,0.4);
 }
 
 .atvImg-shine {
