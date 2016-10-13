@@ -136,7 +136,8 @@ function atvImg(){
 				layer.style.backgroundImage = 'url('+imgSrc+')';
 			}
 			/* Don't allow the image to misalign the bottom/top of the card */
-			layer.style.transform = 'translateZ('+i*2.5+'px)'; 
+			layer.style.width = layer.style.height = (100 + (i*3)) + '%';
+			layer.style.left = layer.style.top = '-' + (i*1.5) + '%';
 			layersHTML.appendChild(layer);
 
 			layers.push(layer);
@@ -231,9 +232,9 @@ function atvImg(){
 		shine.style.transform = 'translateX(' + (offsetX * totalLayers) - 0.1 + 'px) translateY(' + (offsetY * totalLayers) - 0.1 + 'px)';	
 
 		//parallax for each layer
-		var revNum = totalLayers;
+		var revNum = totalLayers, effect = 1.5;
 		for(var ly=0;ly<totalLayers;ly++){
-			layers[ly].style.transform = 'translateZ('+ly*2.5+'px) translateX(' + (offsetX * revNum) * ((ly * 2.5) / wMultiple) + 'px) translateY(' + (offsetY * totalLayers) * ((ly * 2.5) / wMultiple) + 'px)';
+			layers[ly].style.transform = 'translateX(' + (offsetX * revNum) * ((ly * effect) / wMultiple) + 'px) translateY(' + (offsetY * totalLayers) * ((ly * effect) / wMultiple) + 'px)';
 			revNum--;
 		}
 	}
