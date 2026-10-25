@@ -1,3 +1,35 @@
+// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+// http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
+
+// requestAnimationFrame polyfill by Erik Möller. fixes from Paul Irish and Tino Zijdel
+
+// MIT license
+
+(function() {
+    var lastTime = 0;
+    var vendors = ['ms', 'moz', 'webkit', 'o'];
+    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] 
+                                   || window[vendors[x]+'CancelRequestAnimationFrame'];
+    }
+ 
+    if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function(callback, element) {
+            var currTime = new Date().getTime();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+              timeToCall);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+ 
+    if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+}());
+
 /*
  * atvImg
  * Copyright 2015 Drew Wilson
@@ -57,6 +89,7 @@
  * inspiration when creating this plug-in.
  */
 
+
 function atvImg(){
 
 	var d = document,
@@ -64,29 +97,23 @@ function atvImg(){
 		bd = d.getElementsByTagName('body')[0],
 		htm = d.getElementsByTagName('html')[0],
 		win = window,
+		thisImg,
 		imgs = d.querySelectorAll('.atvImg'),
-		totalImgs = imgs.length,
 		supportsTouch = 'ontouchstart' in win || navigator.msMaxTouchPoints;
 
-	if(totalImgs <= 0){
-		return;
-	}
 
 	// build HTML
-	for(var l=0;l<totalImgs;l++){
+	for(var l=0;(thisImg=imgs[l]);l++){
 
-		var thisImg = imgs[l],
-			layerElems = thisImg.querySelectorAll('.atvImg-layer'),
-			totalLayerElems = layerElems.length;
+		var layerElems = thisImg.querySelectorAll('.atvImg-layer'),
+			totalLayerElems = layerElems.length,
+			w = thisImg.clientWidth || thisImg.offsetWidth || thisImg.scrollWidth,
+			h = thisImg.clientHeight || thisImg.offsetHeight || thisImg.scrollHeight;
 
 		if(totalLayerElems <= 0){
 			continue;
 		}
 
-		while(thisImg.firstChild) {
-			thisImg.removeChild(thisImg.firstChild);
-		}
-	
 		var containerHTML = d.createElement('div'),
 			shineHTML = d.createElement('div'),
 			shadowHTML = d.createElement('div'),
@@ -100,68 +127,84 @@ function atvImg(){
 		layersHTML.className = 'atvImg-layers';
 
 		for(var i=0;i<totalLayerElems;i++){
-			var layer = d.createElement('div'),
+			var layer = layerElems[i].cloneNode(true),
 				imgSrc = layerElems[i].getAttribute('data-img');
 
-			layer.className = 'atvImg-rendered-layer';
+			layer.className = layer.className.replace('atvImg-', 'atvImg-rendered-');
 			layer.setAttribute('data-layer',i);
-			layer.style.backgroundImage = 'url('+imgSrc+')';
+			if(imgSrc) {
+				layer.style.backgroundImage = 'url('+imgSrc+')';
+			}
+			/* Don't allow the image to misalign the bottom/top of the card */
+			layer.style.width = layer.style.height = (100 + (i*3)) + '%';
+			layer.style.left = layer.style.top = '-' + (i*1.5) + '%';
 			layersHTML.appendChild(layer);
 
 			layers.push(layer);
+		}
+
+		var node;
+		while(node=thisImg.firstChild) {
+			thisImg.removeChild(node);
 		}
 
 		containerHTML.appendChild(shadowHTML);
 		containerHTML.appendChild(layersHTML);
 		containerHTML.appendChild(shineHTML);
 		thisImg.appendChild(containerHTML);
-
-		var w = thisImg.clientWidth || thisImg.offsetWidth || thisImg.scrollWidth;
 		thisImg.style.transform = 'perspective('+ w*3 +'px)';
+		thisImg.__STEP = 0;
 
 		if(supportsTouch){
 			win.preventScroll = false;
 
-	        (function(_thisImg,_layers,_totalLayers,_shine) {
+	        (function(_thisImg,_container,_w,_h,_layers,_totalLayers,_shine) {
 				thisImg.addEventListener('touchmove', function(e){
 					if (win.preventScroll){
 						e.preventDefault();
 					}
-					processMovement(e,true,_thisImg,_layers,_totalLayers,_shine);		
+					processMovement(e,true,_thisImg,_container,_w,_h,_layers,_totalLayers,_shine);		
 				});
 	            thisImg.addEventListener('touchstart', function(e){
 	            	win.preventScroll = true;
-					processEnter(e,_thisImg);		
+					processEnter(e,_thisImg,_container);	
 				});
 				thisImg.addEventListener('touchend', function(e){
 					win.preventScroll = false;
-					processExit(e,_thisImg,_layers,_totalLayers,_shine);		
+					processExit(e,_thisImg,_container,_layers,_totalLayers,_shine);		
 				});
-	        })(thisImg,layers,totalLayerElems,shineHTML);
+	        })(thisImg,containerHTML,w,h,layers,totalLayerElems,shineHTML);
 	    } else {
-	    	(function(_thisImg,_layers,_totalLayers,_shine) {
+	    	(function(_thisImg,_container,_w,_h,_layers,_totalLayers,_shine) {
 				thisImg.addEventListener('mousemove', function(e){
-					processMovement(e,false,_thisImg,_layers,_totalLayers,_shine);		
+					processMovement(e,false,_thisImg,_container,_w,_h,_layers,_totalLayers,_shine);		
 				});
 	            thisImg.addEventListener('mouseenter', function(e){
-					processEnter(e,_thisImg);		
+					processEnter(e,_thisImg,_container);		
 				});
 				thisImg.addEventListener('mouseleave', function(e){
-					processExit(e,_thisImg,_layers,_totalLayers,_shine);		
+					processExit(e,_thisImg,_container,_layers,_totalLayers,_shine);
 				});
-	        })(thisImg,layers,totalLayerElems,shineHTML);
+	        })(thisImg,containerHTML,w,h,layers,totalLayerElems,shineHTML);
 	    }
 	}
 
-	function processMovement(e, touchEnabled, elem, layers, totalLayers, shine){
+	function processMovement(e, touchEnabled, elem, container, w, h, layers, totalLayers, shine) {
+		cancelAnimationFrame(elem.__STEP);
+		elem.__STEP = requestAnimationFrame(_processMovement.bind(this, e, touchEnabled, elem, container, w, h, layers, totalLayers, shine));
+	}
+	function _processMovement(e, touchEnabled, elem, container, w, h, layers, totalLayers, shine){
 
 		var bdst = bd.scrollTop || htm.scrollTop,
 			bdsl = bd.scrollLeft,
 			pageX = (touchEnabled)? e.touches[0].pageX : e.pageX,
 			pageY = (touchEnabled)? e.touches[0].pageY : e.pageY,
 			offsets = elem.getBoundingClientRect(),
-			w = elem.clientWidth || elem.offsetWidth || elem.scrollWidth, // width
-			h = elem.clientHeight || elem.offsetHeight || elem.scrollHeight, // height
+			
+			/* Measuring every time can cause thrashing / repaints */
+			// w = elem.clientWidth || elem.offsetWidth || elem.scrollWidth, // width
+			// h = elem.clientHeight || elem.offsetHeight || elem.scrollHeight, // height
+			
 			wMultiple = 320/w,
 			offsetX = 0.52 - (pageX - offsets.left - bdsl)/w, //cursor position X
 			offsetY = 0.52 - (pageY - offsets.top - bdst)/h, //cursor position Y
@@ -179,30 +222,33 @@ function atvImg(){
 		}
 
 		//container transform
-		if(elem.firstChild.className.indexOf(' over') != -1){
+		if(container.className.indexOf(' over') != -1){
 			imgCSS += ' scale3d(1.07,1.07,1.07)';
 		}
-		elem.firstChild.style.transform = imgCSS;
+		container.style.transform = imgCSS;
 		
 		//gradient angle and opacity for shine
 		shine.style.background = 'linear-gradient(' + angle + 'deg, rgba(255,255,255,' + (pageY - offsets.top - bdst)/h * 0.4 + ') 0%,rgba(255,255,255,0) 80%)';
 		shine.style.transform = 'translateX(' + (offsetX * totalLayers) - 0.1 + 'px) translateY(' + (offsetY * totalLayers) - 0.1 + 'px)';	
 
 		//parallax for each layer
-		var revNum = totalLayers;
+		var revNum = totalLayers, effect = 1.5;
 		for(var ly=0;ly<totalLayers;ly++){
-			layers[ly].style.transform = 'translateX(' + (offsetX * revNum) * ((ly * 2.5) / wMultiple) + 'px) translateY(' + (offsetY * totalLayers) * ((ly * 2.5) / wMultiple) + 'px)';
+			layers[ly].style.transform = 'translateX(' + (offsetX * revNum) * ((ly * effect) / wMultiple) + 'px) translateY(' + (offsetY * totalLayers) * ((ly * effect) / wMultiple) + 'px)';
 			revNum--;
 		}
 	}
 
-	function processEnter(e, elem){
-		elem.firstChild.className += ' over';
+	/* probably doesn't need an animation frame */
+	function processEnter(e, elem, container){
+		container.className += ' over';
 	}
 
-	function processExit(e, elem, layers, totalLayers, shine){
-
-		var container = elem.firstChild;
+	function processExit(e, elem, container, layers, totalLayers, shine) {
+		cancelAnimationFrame(elem.__STEP);
+		elem.__STEP = requestAnimationFrame(_processExit.bind(this, e, elem, container, layers, totalLayers, shine));
+	}
+	function _processExit(e, elem, container, layers, totalLayers, shine){
 
 		container.className = container.className.replace(' over','');
 		container.style.transform = '';
